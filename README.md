@@ -7,9 +7,7 @@ Adagio contains several modules that implement the method described in the
 paper:
 
 **[Structural Detection of Android Malware using Embedded Call Graphs](http://user.informatik.uni-goettingen.de/~hgascon/docs/2013b-aisec.pdf)**  
-
 Hugo Gascon, Fabian Yamaguchi, Daniel Arp, Konrad Rieck  
-
 *ACM Workshop on Security and Artificial Intelligence (AISEC) November 2013*
 
 These modules allow to extract and label the call graphs from a series of
