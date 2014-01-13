@@ -60,7 +60,7 @@ class MultiClassAnalysis:
             print "[*] file names loaded"
 
         else:            
-            files = self.read_files(dataset_dir, "fcgnx.pckl")
+            files = self.read_files(dataset_dir, "fcgnx.pz")
             if len(files) > 0:
                 print "Loading {0} samples".format(len(files))
                 widgets = ['Unpickling... : ', Percentage(), ' ', Bar(marker='#',left='[',right=']'),
@@ -245,7 +245,7 @@ class Analysis:
             split: The percentage of samples used for training (value between 0 and 1)
             precomputed_matrix: name of file if a data or kernel matrix has already
                 been computed.
-            y: If precomputed_matrix is True, a pcklzip list of labels must
+            y: If precomputed_matrix is True, a pickled and gzipped list of labels must
                 be provided.
 
         Returns:
@@ -281,7 +281,7 @@ class Analysis:
         else:
             # loop over dirs
             for d in zip(dirs, labels):
-                files = self.read_files(d[0], "fcgnx.pckl", max_files)
+                files = self.read_files(d[0], "fcgnx.pz", max_files)
                 print "Loading samples in dir {0} with label {1}".format(d[0], d[1])
                 widgets = ['Unpickling... : ', Percentage(), ' ', Bar(marker='#',left='[',right=']'),
                                    ' ', ETA(), ' ']

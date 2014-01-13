@@ -70,7 +70,7 @@ def compute_neighborhoods_per_weights(d, w, n_weights, n_files=300):
         Outputs the file feature_analysis.txt
     """
 
-    files = read_files(d, "fcgnx.pckl", n_files)
+    files = read_files(d, "fcgnx.pz", n_files)
     sorted_weights_idx = w.argsort()[::-1]
 
     f_out = "feature_analysis.txt".format(n_weights)
@@ -93,9 +93,7 @@ def compute_neighborhoods_per_weights(d, w, n_weights, n_files=300):
     fd.close()
     print "[*] File written."
 
-
 def get_high_ranked_neighborhoods(fcgnx_file, w, sorted_weights_idx, show_small=False, weights=1):
-
     # g = FCGextractor.build_cfgnx(fcgnx_file)
     g = pz.load(fcgnx_file)
     g_hash = ml.neighborhood_hash(g)
@@ -129,7 +127,6 @@ def get_high_ranked_neighborhoods(fcgnx_file, w, sorted_weights_idx, show_small=
             return neighborhoods, n_nodes
 
 def add_weights_to_nodes(g, w, show_labels=True):
-
     g_hash = ml.neighborhood_hash(g)    
 
     #initialize the weight for every node in g_hash
@@ -176,12 +173,10 @@ def add_weights_to_nodes(g, w, show_labels=True):
 
     return g_hash_weighted
 
-
 def normalize_weights(a, imin=0.0, imax=1.0):
     dmin = a.min()
     dmax = a.max()
     return imin + (imax - imin) * (a - dmin) / (dmax - dmin)
-
 
 def read_files(d, file_extension, max_files=0):
     files = []

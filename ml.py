@@ -1,6 +1,6 @@
 #!/usr/bin/python # ADAGIO Android Application Graph-based Classification
 # ml >> functions for computation of kernel matrices and feature vectors
-# Copyright (c) 2013 Hugo Gascon <hgascon@gmail.com>
+# Copyright (c) 2013 Hugo Gascon <hgascon@uni-goettingen.de>
 
 import pz
 import numpy as np
@@ -74,7 +74,7 @@ def nh_kernel_matrix(graph_set, R=1):
         pbar.finish()
         #build lower triangle
         K = K + K.transpose() - np.identity(len(K))
-        pz.save(K, "K_{0}.pckl".format(r))
+        pz.save(K, "K_{0}.pz".format(r))
         K_set.append(K)
 
     #normalization of K
@@ -505,10 +505,4 @@ def array_to_str(a):
 
 def str_to_array(s):
     return np.array(list(s), dtype=np.int64)
-
-
-
-
-
-
 
