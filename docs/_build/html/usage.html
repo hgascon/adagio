@@ -70,15 +70,15 @@ fe1b0a59d0039683d007de6a1851b08c34a8dfd76765ec9d9388cbb670d6d6ab.fcg.pz</pre>
 <p>The extension <strong>pz</strong> indicates that the file is a <em>pickled</em> and <em>gzipped</em> object that can be loaded using the pz.py module. The <strong>fcg</strong> extension indicates that the object is a function call graph object. Each <strong>fcg</strong> object is basically a <a class="reference external" href="http://networkx.github.io">Networkx</a> directed graph where each node corresponds to a method in the decompiled DEX code. Additionally, a 15 bit label property is assigned to each node. You can read the paper to know how this binary vector is generated according to the decompiled instructions found in each method.</p>
 <p>In order to use the analysis modules in a interactive way, the best option is to use <a class="reference external" href="http://ipython.org/">iPython</a>.</p>
 <p>This is an example for a binary class classification problem. The call graphs are loaded and the feature vector for each one of them is generated and included in a data matrix:</p>
-<div class="highlight-python"><pre>In [1]: from analysis import Analysis
+<div class="highlight-python"><pre>In [1]: from adagio.analysis import Analysis
 In [2]: a = Analysis(["malware_dir","clean_dir"], labels=[1,0], split=0.8)
-Loading samples in dir data/malware with label 1
-Unpickling... : 100% [####################################################################] Time: 0:00:39
-Loading samples in dir data/clean with label 0
-Unpickling... : 100% [####################################################################] Time: 0:01:10
+Loading samples in dir malware_dir with label 1
+Unpickling... : 100% [##############################################] Time: 0:00:39
+Loading samples in dir clean_dir with label 0
+Unpickling... : 100% [##############################################] Time: 0:01:10
 [*] Stacking feature vectors...
-[*] Converting features vectors to binary...
-Making X binary... : 100% [###############################################################] Time: 0:57:04</pre>
+[*] Converting features vectors to binary representation...
+Making X binary... : 100% [#########################################] Time: 0:57:04</pre>
 </div>
 </div>
 
