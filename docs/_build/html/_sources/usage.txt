@@ -33,7 +33,18 @@ The extension **pz** indicates that the file is a *pickled* and *gzipped* object
 
 .. _Networkx: http://networkx.github.io
 
-In order to use the analysis modules in a interactive way, the best option is iPython_.
+In order to use the analysis modules in a interactive way, the best option is to use iPython_.
 
 .. _iPython: http://ipython.org/
 
+This is an example for a binary class classification problem. The call graphs are loaded and the feature vector for each one of them is generated and included in a data matrix::
+
+    In [1]: from analysis import Analysis
+    In [2]: a = Analysis(["malware_dir","clean_dir"], labels=[1,0], split=0.8)
+    Loading samples in dir data/malware with label 1
+    Unpickling... : 100% [####################################################################] Time: 0:00:39
+    Loading samples in dir data/clean with label 0
+    Unpickling... : 100% [####################################################################] Time: 0:01:10
+    [*] Stacking feature vectors...
+    [*] Converting features vectors to binary...
+    Making X binary... : 100% [###############################################################] Time: 0:57:04

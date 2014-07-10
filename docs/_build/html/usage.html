@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -13,7 +15,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
+        URL_ROOT:    '',
         VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -26,8 +28,8 @@
     <link rel="top" title="Adagio 1.0 documentation" href="index.html" />
     <link rel="prev" title="Installation" href="installation.html" /> 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
+  <body>
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -43,17 +45,16 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body" role="main">
+          <div class="body">
             
   <div class="section" id="usage">
 <span id="id1"></span><h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
 <p>Start by creating a couple of directories, one for malware and another for clean apps. Copy your samples to these directories and then use FCGextractor to generate the function call graphs:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ ./FCGextractor.py malware_dir
-$ ./FCGextractor.py clean_dir
-</pre></div>
+<div class="highlight-python"><pre>$ ./FCGextractor.py malware_dir
+$ ./FCGextractor.py clean_dir</pre>
 </div>
 <p>For each one of the samples, a file named with the <strong>SHA256</strong> of the binary and extension <strong>fcg.pz</strong> will be generated:</p>
-<div class="highlight-python"><div class="highlight"><pre>$ ls malware_dir
+<div class="highlight-python"><pre>$ ls malware_dir
 ec0e0d25aa1de4f38894fb1999d6f21535610ffba15423a02ec993fea1561c66.fcg.pz
 eeea9fb531c7d24fe5edcbbb039bf4f19dff285447cdc13f15260145c40b89c8.fcg.pz
 f01d9a2d49f49d28aaf222d7c5ba855648f46768a403808e652ee1d856c46076.fcg.pz
@@ -64,30 +65,38 @@ f7c36355c706fc9dd8954c096825e0613807e0da4bd7f3de97de0aec0be23b79.fcg.pz
 f9a57ca11d800dbcecc9042f056e202f697da89d7fd117779ef73af35a8580b5.fcg.pz
 fca4e19344883ab94c6ac8a45a1d93f3a06920028d2aa660bfb217b5aabb3874.fcg.pz
 fd0eccda9d8ee948c8f72c68e3d72f7e6bf2043e7bdb7213e6c6a6c29110621e.fcg.pz
-fe1b0a59d0039683d007de6a1851b08c34a8dfd76765ec9d9388cbb670d6d6ab.fcg.pz
-</pre></div>
+fe1b0a59d0039683d007de6a1851b08c34a8dfd76765ec9d9388cbb670d6d6ab.fcg.pz</pre>
 </div>
 <p>The extension <strong>pz</strong> indicates that the file is a <em>pickled</em> and <em>gzipped</em> object that can be loaded using the pz.py module. The <strong>fcg</strong> extension indicates that the object is a function call graph object. Each <strong>fcg</strong> object is basically a <a class="reference external" href="http://networkx.github.io">Networkx</a> directed graph where each node corresponds to a method in the decompiled DEX code. Additionally, a 15 bit label property is assigned to each node. You can read the paper to know how this binary vector is generated according to the decompiled instructions found in each method.</p>
-<p>In order to use the analysis modules in a interactive way, the best option is <a class="reference external" href="http://ipython.org/">iPython</a>.</p>
+<p>In order to use the analysis modules in a interactive way, the best option is to use <a class="reference external" href="http://ipython.org/">iPython</a>.</p>
+<p>This is an example for a binary class classification problem. The call graphs are loaded and the feature vector for each one of them is generated and included in a data matrix:</p>
+<div class="highlight-python"><pre>In [1]: from analysis import Analysis
+In [2]: a = Analysis(["malware_dir","clean_dir"], labels=[1,0], split=0.8)
+Loading samples in dir data/malware with label 1
+Unpickling... : 100% [####################################################################] Time: 0:00:39
+Loading samples in dir data/clean with label 0
+Unpickling... : 100% [####################################################################] Time: 0:01:10
+[*] Stacking feature vectors...
+[*] Converting features vectors to binary...
+Making X binary... : 100% [###############################################################] Time: 0:57:04</pre>
+</div>
 </div>
 
 
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="installation.html"
                         title="previous chapter">Installation</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/usage.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/usage.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -104,7 +113,7 @@ fe1b0a59d0039683d007de6a1851b08c34a8dfd76765ec9d9388cbb670d6d6ab.fcg.pz
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -116,9 +125,9 @@ fe1b0a59d0039683d007de6a1851b08c34a8dfd76765ec9d9388cbb670d6d6ab.fcg.pz
         <li><a href="index.html">Adagio 1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer" role="contentinfo">
+    <div class="footer">
         &copy; Copyright 2014, Hugo Gascon.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3a0.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>
