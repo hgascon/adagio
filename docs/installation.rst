@@ -16,11 +16,10 @@ Dependencies
 
 In order to use the code, you will need to install the following dependencies:
 
-* Androguard_, the reverse engineering toolkit for Android.
+    | * Androguard_, the reverse engineering toolkit for Android.
+    | * scikit-learn_, the awesome python toolbox for machine learning.
+    | * Networkx_, a python package for manipulation of complex networks.
+
 .. _Androguard: https://code.google.com/p/androguard/
-* scikit-learn_, the awesome python toolbox for machine learning.
 .. _scikit-learn: http://scikit-learn.org/stable/
-* Networkx_, a python package for manipulation of complex networks.
 .. _Networkx: http://networkx.github.io
-
-
