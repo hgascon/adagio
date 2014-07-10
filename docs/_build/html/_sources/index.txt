@@ -6,19 +6,18 @@
 .. _index:
 
 
-============================================================
-Adagio: Structural Analysis and Detection of Android Malware 
-============================================================
+====================================================
+Structural Analysis and Detection of Android Malware 
+====================================================
 
 Adagio contains several modules that implement the method described in the
-paper:
+paper_:
 
-`Structural Detection of Android Malware using Embedded Call Graphs
-<http://user.informatik.uni-goettingen.de/~hgascon/docs/2013b-aisec.pdf>`_.
+    | **Structural Detection of Android Malware using Embedded Call Graphs**
+    | Hugo Gascon, Fabian Yamaguchi, Daniel Arp, Konrad Rieck
+    | *ACM Workshop on Security and Artificial Intelligence (AISEC) November 2013*
 
-Hugo Gascon, Fabian Yamaguchi, Daniel Arp, Konrad Rieck
-
-*ACM Workshop on Security and Artificial Intelligence (AISEC) November 2013*
+.. _paper: http://user.informatik.uni-goettingen.de/~hgascon/docs/2013b-aisec.pdf
 
 These modules allow to extract and label the call graphs from a series of
 Android APKs or DEX files and apply an explicit feature map that captures
@@ -30,6 +29,7 @@ Having troubles?
 ================
 
 If you are having troubles running the code, you are welcome to drop a message_.
+
 .. _message: https://github.com/hgascon/adagio/issues
 
 Content
