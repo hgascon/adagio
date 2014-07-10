@@ -281,7 +281,7 @@ class Analysis:
         else:
             # loop over dirs
             for d in zip(dirs, labels):
-                files = self.read_files(d[0], "fcgnx.pz", max_files)
+                files = self.read_files(d[0], "fcg.pz", max_files)
                 print "Loading samples in dir {0} with label {1}".format(d[0], d[1])
                 widgets = ['Unpickling... : ', Percentage(), ' ', Bar(marker='#',left='[',right=']'),
                                    ' ', ETA(), ' ']
