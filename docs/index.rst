@@ -3,8 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-About
-==================================
+.. _index:
+
+
+============================================================
+Adagio: Structural Analysis and Detection of Android Malware 
+============================================================
 
 Adagio contains several modules that implement the method described in the
 paper:
@@ -22,22 +26,17 @@ their structural relationships. The analysis module provides classes to desing a
 or multiclass classification experiment using the vectorial representation and
 support vector machines.
 
-In order to use the code, you will need to install the following dependencies:
+Having troubles?
+================
 
-* Androguard_, the reverse engineering toolkit for Android.
-.. _Androguard: https://code.google.com/p/androguard/
-* scikit-learn_, the awesome python toolbox for machine learning.
-.. _scikit-learn: http://scikit-learn.org/stable/
-* Networkx_, a python package for manipulation of complex networks.
-.. _Networkx: http://networkx.github.io
+If you are having troubles running the code, you are welcome to drop a message_.
+.. _message: https://github.com/hgascon/adagio/issues
 
-
+Content
+=======
 
 .. toctree::
-   :maxdepth: 2
 
-   introduction.rst
-   installation.rst
-   usage.rst
-
-
+    introduction
+    installation
+    usage

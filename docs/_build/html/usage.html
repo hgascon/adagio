@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>About &mdash; Adagio 1.0 documentation</title>
+    <title>Usage &mdash; Adagio 1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Adagio 1.0 documentation" href="index.html" />
-    <link rel="prev" title="About" href="installation.html" /> 
+    <link rel="prev" title="Installation" href="installation.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -34,7 +34,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="installation.html" title="About"
+          <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Adagio 1.0 documentation</a> &raquo;</li> 
       </ul>
@@ -45,42 +45,14 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="about">
-<h1>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h1>
-<p>Adagio contains several modules that implement the method described in the
-paper:</p>
-<p>Structural Detection of Android Malware using Embedded Call Graphs(<a class="reference external" href="http://user.informatik.uni-goettingen.de/~hgascon/docs/2013b-aisec.pdf">http://user.informatik.uni-goettingen.de/~hgascon/docs/2013b-aisec.pdf</a>)
-Hugo Gascon, Fabian Yamaguchi, Daniel Arp, Konrad Rieck
-<em>ACM Workshop on Security and Artificial Intelligence (AISEC) November 2013</em></p>
-<p>These modules allow to extract and label the call graphs from a series of
-Android APKs or DEX files and apply an explicit feature map that captures
-their structural relationships. The analysis module provides classes to desing a binary
-or multiclass classification experiment using the vectorial representation and
-support vector machines.</p>
-<p>In order to use the code, you will need to install the following dependencies:</p>
-<ul class="simple">
-<li>[Androguard](<a class="reference external" href="https://code.google.com/p/androguard/">https://code.google.com/p/androguard/</a>), the reverse engineering toolkit for Android.</li>
-<li>[scikit-learn](<a class="reference external" href="http://scikit-learn.org/stable/">http://scikit-learn.org/stable/</a>), the awesome python toolbox for machine learning.</li>
-<li>[Networkx](<a class="reference external" href="http://networkx.github.io">http://networkx.github.io</a>), a python package for manipulation of complex networks.</li>
-</ul>
-<div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
-</div>
-</div>
-<div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
-</div>
-<div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-</div>
-<div class="section" id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="usage">
+<span id="id1"></span><h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>Start by creating a couple of directories, one for malware and another for clean apps. Copy your samples to these directories and then use FCGextractor to generate the function call graphs:</p>
+<blockquote>
+<div>$&gt; ./FCGextractor.py &lt;malware_dir&gt;
+$&gt; ./FCGextractor.py &lt;clean_dir&gt;</div></blockquote>
+<p>For each one of the samples, a file named with the <strong>SHA256</strong> of the binary and extension <strong>fcg.pz</strong> will be generated. The extension <strong>pz</strong> indicates that the file is a <em>pickled</em> and <em>gziped</em> object that can be loaded using the pz.py module. The <strong>fcg</strong> extension indicates that the object is a function call graph object. Each <strong>fcg</strong> object is basically a <a class="reference external" href="http://networkx.github.io">Networkx</a> directed graph where each node corresponds to a method in the decompiled DEX code. Additionally, a 15 bit label property is assigned to each node. You can read the paper to know how this binary vector is generated according to the decompiled instructions found in each method.</p>
+<p>In order to use the analysis modules in a interactive way, the best option is <a class="reference external" href="http://ipython.org/">iPython</a>.</p>
 </div>
 
 
@@ -89,17 +61,9 @@ support vector machines.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">About</a></li>
-<li><a class="reference internal" href="#introduction">Introduction</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#usage">Usage</a></li>
-</ul>
-
   <h4>Previous topic</h4>
   <p class="topless"><a href="installation.html"
-                        title="previous chapter">About</a></p>
+                        title="previous chapter">Installation</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -131,7 +95,7 @@ support vector machines.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="installation.html" title="About"
+          <a href="installation.html" title="Installation"
              >previous</a> |</li>
         <li><a href="index.html">Adagio 1.0 documentation</a> &raquo;</li> 
       </ul>
