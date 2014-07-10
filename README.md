@@ -16,8 +16,5 @@ their structural relationships. The analysis module provides classes to desing a
 or multiclass classification experiment using the vectorial representation and
 support vector machines.
 
-In order to use the code, you will need to install the following dependencies:
+You may start by taking a look at the [documentation](http://adagio.readthedocs.org/).
 
-* [Androguard](https://code.google.com/p/androguard/), the reverse engineering toolkit for Android.
-* [scikit-learn](http://scikit-learn.org/stable/), the awesome python toolbox for machine learning.
-* [networkx](http://networkx.github.io), a python package for manipulation of complex networks.
