@@ -1,0 +1,11 @@
+*.bak
+*.swp
+*.aux
+*.pyc
+*.ent
+*.log
+*.bbl
+*.synctex.gz
+*.blg
+*.rel
+.DS_Store
