@@ -70,3 +70,11 @@ As soon as the data matrix is generated, it is possible to apply SVMs to the pro
     [*] Training...
     [*] Testing...
     [*] ROC saved.
+
+The performance of the model can be reviewed with the average receiver operating characteristic of all the iterations of the experiment. You can generate it using the following command::
+
+    In[3]: a.plot_average_roc("average_roc.png", boundary=1.0)
+
+Generating the feature vectors is computally involved, so it can take some time. In order to avoid computing them again, the data matrix, the labels and the name of the files can be saved using the function::
+
+    In[4]: a.save_data()

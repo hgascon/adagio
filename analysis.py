@@ -380,15 +380,15 @@ class Analysis:
         self.Y_train = self.Y[ train_index ]
         self.Y_test = self.Y[ test_index ]
 
-    def save_feature_space(self):
+    def save_data(self):
         """ Store pz objects for the data matrix, the labels and
             the name of the original samples so that they can be used
             in a new experiment without the need to extract all
             features again
         """
-        pz.save(a.X, "X_2class.pz")
-        pz.save(a.Y, "Y_2class.pz")
-        pz.save(a.fnames, "fnames_2class.pz")
+        pz.save(self.X, "X.pz")
+        pz.save(self.Y, "Y.pz")
+        pz.save(self.fnames, "fnames.pz")
 
 
     ###################################
