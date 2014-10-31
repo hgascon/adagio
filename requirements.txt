@@ -1,0 +1,6 @@
+androguard
+progressbar
+networkx
+numpy
+scikit-learn
+scipy
