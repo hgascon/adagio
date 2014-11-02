@@ -5,13 +5,8 @@ import os
 
 import networkx as nx
 import adagio.common.pz as pz
-
-
 from progressbar import *
-from modules.androguard.androguard import *
-from modules.androguard.androguard.core.analysis import *
 from modules.androguard.androlyze import *
-
 from adagio.common.utils import get_sha256
 
 
@@ -83,15 +78,15 @@ class PDGGenerator():
         #TODO
         return
 
-    def build_icfg_nx(self, file):
+    def build_icfg_nx(self, filename):
         """ Using NX and Androguard, build an interprocedural control flow
         graph NX object so that node names are basic blocks names: (class name,
         method name, descriptor, bb)
         """
         icgnx = nx.DiGraph()
-        print "Loading file {0}...".format(file)
+        print "Loading file {0}...".format(filename)
         try:
-            a, d, dx = AnalyzeAPK(file)
+            a, d, dx = AnalyzeAPK(filename)
         except zipfile.BadZipfile:
             #if file is not an APK, may be a dex object
             d, dx = AnalyzeDex(filename)

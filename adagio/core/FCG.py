@@ -1,13 +1,11 @@
 #!/usr/bin/python
-# ADAGIO Android Application Graph-based Classification
-# fcg_extractor.py >> Read all APKs in dir and save NX graphs as pickle objects
-# Copyright (c) 2013 Hugo Gascon <hgascon@uni-goettingen.de>
+# ADAGIO Structural Analysis of Android Binaries
+# Copyright (c) 2014 Hugo Gascon <hgascon@mail.de>
 
 """ A module to build NX objects from APKs call graphs. """
 
 import sys
 import os
-import zipfile
 import networkx as nx
 import numpy as np
 import adagio.common.pz as pz
@@ -17,8 +15,6 @@ from adagio.core.instructionSet import INSTRUCTION_CLASS_COLOR
 from adagio.core.instructionSet import INSTRUCTION_CLASSES
 
 from progressbar import *
-from modules.androguard.androguard import *
-from modules.androguard.androguard.core.analysis import *
 from modules.androguard.androlyze import *
 from adagio.common.utils import get_sha256
 

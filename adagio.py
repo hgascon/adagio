@@ -1,7 +1,6 @@
 #!/usr/bin/python
-# ADAGIO Android Application Graph-based Classification
-# adagio.py >> Main wrapper for other modules
-# Copyright (c) 2013 Hugo Gascon <hgascon@uni-goettingen.de>
+# ADAGIO Structural Analysis of Android Binaries
+# Copyright (c) 2014 Hugo Gascon <hgascon@mail.de>
 
 
 import sys
@@ -45,10 +44,10 @@ if __name__ == "__main__":
     parser.add_argument("-d", "--dir", default="",
                         help="Load APK/DEX files from this directory.")
 
-    parser.add_argument("-o", "--out", default="",
+    parser.add_argument("-o", "--out", default="data/fcg",
                         help="Select output directory for generated graphs.\
                         If no directory is given, they will be written\
-                        to the input directory.")
+                        to the data/fcg directory.")
 
     fcga = parser.add_argument_group('CALL GRAPHS ANALYSIS')
     fcga.add_argument("-f", "--fcgraphs", action="store_true",
@@ -65,14 +64,12 @@ if __name__ == "__main__":
 
     generator = ""
     if args.fcgraphs:
-        if args.out:
-            args.out = os.path.realpath(args.out)
+        args.out = os.path.realpath(args.out)
         generator = FCGGenerator(args.dir, args.out)
 
     elif args.pdgraphs:
-        #if args.out:
-            #args.out = os.path.realpath(args.out)
-        #generator = PDGGenerator(args.dir, args.out)
+        # args.out = os.path.realpath(args.out)
+        # generator = PDGGenerator(args.dir, args.out)
         print "Not implemented yet!"
         sys.exit()
 
