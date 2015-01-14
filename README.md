@@ -15,6 +15,3 @@ Android APKs or DEX files and apply an explicit feature map that captures
 their structural relationships. The analysis module provides classes to desing a binary
 or multiclass classification experiment using the vectorial representation and
 support vector machines.
-
-You may start by taking a look at the [documentation](http://adagio.readthedocs.org/).
-
