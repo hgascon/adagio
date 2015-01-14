@@ -68,10 +68,10 @@ if __name__ == "__main__":
         generator = FCGGenerator(args.dir, args.out)
 
     elif args.pdgraphs:
-        # args.out = os.path.realpath(args.out)
-        # generator = PDGGenerator(args.dir, args.out)
-        print "Not implemented yet!"
-        sys.exit()
+        args.out = os.path.realpath(args.out)
+        generator = PDGGenerator(args.dir, args.out)
+        # print "Not implemented yet!"
+        # sys.exit()
 
     if generator:
         print_logo()

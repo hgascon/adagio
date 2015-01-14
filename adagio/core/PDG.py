@@ -24,7 +24,7 @@ class PDGGenerator():
         sys.setrecursionlimit(100000)
         files = []
 
-        # check if fcg doesnt exist yet and mark the file to be processed
+        # check if pdg doesnt exist yet and mark the file to be processed
         for dirName, subdirList, fileList in os.walk(self.read_dir):
             for f in fileList:
                 files.append(os.path.join(dirName, f))
@@ -44,8 +44,8 @@ class PDGGenerator():
         # loop through .apk files and save them in .pdg.pz format
         for f in files:
 
-            # f = os.path.join(self.read_dir, fn)
-            print "[] Loading {0}".format(f)
+            f = os.path.join(self.read_dir, fn)
+            print '[] Loading {0}'.format(f)
             try:
                 g = self.build_pdg(f)
 
@@ -75,11 +75,39 @@ class PDGGenerator():
         print "Done."
 
     def build_pdg(self, filename):
-        #TODO
-        return
+        pdg = nx.DiGraph()
+        print "Loading file {0}...".format(filename)
+        try:
+            a, d, dx = AnalyzeAPK(filename)
+        except zipfile.BadZipfile:
+            #if file is not an APK, may be a dex object
+            d, dx = AnalyzeDex(filename)
+
+        methods = d.get_methods()
+
+        # set up progress bar
+        widgets = ['Building PDG: ',
+                   Percentage(), ' ',
+                   Bar(marker='#', left='[', right=']'),
+                   ' ', ETA(), ' ']
+        pbar = ProgressBar(widgets=widgets, maxval=len(methods))
+        pbar.start()
+        progress = 0
+
+        for method in methods:
+            for bb in dx.get_method(method).basic_blocks.get():
+                children = []
+                label = self.get_bb_label(bb)
+                children = self.get_children(bb, dx)
+                pdg.add_node(label)
+                pdg.add_edges_from([(label, child) for child in children])
+            progress += 1
+            pbar.update(progress)
+        pbar.finish()
+        return pdg
 
     def build_icfg_nx(self, filename):
-        """ Using NX and Androguard, build an interprocedural control flow
+        """ Using NX and Androguard, build an interprocedural control flow (ICFG)
         graph NX object so that node names are basic blocks names: (class name,
         method name, descriptor, bb)
         """

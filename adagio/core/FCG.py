@@ -95,7 +95,7 @@ class FCGGenerator():
         try:
             a, d, dx = AnalyzeAPK(filename)
         except zipfile.BadZipfile:
-            #if file is not an APK, may be a dex object
+            # if file is not an APK, may be a dex object
             d, dx = AnalyzeDex(filename)
 
         for method in d.get_methods():
@@ -108,7 +108,7 @@ class FCGGenerator():
                 remote_method = cob[0]
                 children.append(self.get_node_name(remote_method))
 
-            #find all instructions in method and encode using coloring
+            # find all instructions in method and encode using coloring
             instructions = []
             for i in method.get_instructions():
                 instructions.append(i.get_name())
