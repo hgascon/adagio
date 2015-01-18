@@ -21,7 +21,18 @@ class MultiClassAnalysis:
     """ A class to run a multiclass classification experiment """
 
     def __init__(self, dataset_dir, families, split, precomputed_matrix="", y="", fnames=""):
-     
+        """
+
+        Args:
+            dataset_dir: a dir for pz objects
+            families: a dictionary with file names as keys and classes
+                    (families for malware) as values
+            split: The proportion of training and testing data
+            precomputed_matrix: Data matrix in the case that it has been
+                    previously computed
+            y: precomputed class labels
+            fnames: file names for precomputed data
+        """
         self.split = split
         self.families = families
         self.X = []
@@ -52,12 +63,14 @@ class MultiClassAnalysis:
             self.fnames = pz.load(fnames)
             print "[*] file names loaded"
 
-        else:            
-            files = self.read_files(dataset_dir, "fcgnx.pz")
+        else:
+            files = self.read_files(dataset_dir, "fcg.pz")
             if len(files) > 0:
                 print "Loading {0} samples".format(len(files))
-                widgets = ['Unpickling... : ', Percentage(), ' ', Bar(marker='#',left='[',right=']'),
-                            ' ', ETA(), ' ']
+                widgets = ['Unpickling... : ',
+                           Percentage(), ' ',
+                           Bar(marker='#', left='[', right=']'), ' ',
+                           ETA(), ' ']
                 pbar = ProgressBar(widgets=widgets, maxval=len(files))
                 pbar.start()
                 progress = 0
@@ -73,12 +86,19 @@ class MultiClassAnalysis:
 
                             t0 = time.time()
                             x_i = self.compute_feature_vector(g)
-                            self.feature_vector_times.append( time.time() - t0 )
-                            self.label_dist = np.sum([self.label_dist, x_i], axis=0)
+                            # save feature vector computing time for
+                            # performance evaluation
+                            self.feature_vector_times.append(time.time() - t0)
+                            # save distribution of generated labels
+                            self.label_dist = np.sum([self.label_dist,
+                                                      x_i], axis=0)
+                            # save sizes of the sample for further analysis
+                            # of the dataset properties
                             self.sample_sizes.append(size)
                             self.neighborhood_sizes += ml.neighborhood_sizes(g)
                             for n, l in g.node.iteritems():
-                                self.class_dist = np.sum([self.class_dist, l["label"]], axis=0)
+                                self.class_dist = np.sum([self.class_dist,
+                                                          l["label"]], axis=0)
 
                             # delete nx object to free memory
                             del g
@@ -97,11 +117,15 @@ class MultiClassAnalysis:
             print "[*] Stacking feature vectors..."
             self.X = np.vstack(self.X)
             print "[*] Converting features vectors to binary..."
-            self.X, self.b = ml.make_binary(self.X)  
+            self.X, self.b = ml.make_binary(self.X)
+
+    ################################
+    # Data Preprocessing functions #
+    ################################
 
     def read_files(self, d, file_extension, max_files=0):
         """ Return a random list of N files with a certain extension in dir d
-        
+
         Args:
             d: directory to read files from
             file_extension: consider files only with this extension
@@ -113,16 +137,16 @@ class MultiClassAnalysis:
         """
 
         files = []
-        for fn in  os.listdir(d):
-            if fn.lower().endswith(file_extension):
-                files.append(os.path.join(d, fn))
+        for f in os.listdir(d):
+            if f.lower().endswith(file_extension):
+                files.append(os.path.join(d, f))
         shuffle(files)
 
-        #if max_files is 0, return all the files in dir
+        # if max_files is 0, return all the files in dir
         if max_files == 0:
             max_files = len(files)
         files = files[:max_files]
-        
+
         return files
 
     def compute_feature_vector(self, g):
@@ -177,9 +201,13 @@ class MultiClassAnalysis:
         self.Y_train = self.Y[ train_index ]
         self.Y_test = self.Y[ test_index ]
 
+    ###################################
+    # Learning & Evaluation functions #
+    ###################################
+    
     def run_closed_experiment(self, iterations=10):
         """ Train a classifier on test data, obtain the best combination of
-        paramters through a grid search cross-validation and test the classifier
+        parameters through a grid search cross-validation and test the classifier
         using a closed-world split of the dataset. The results from the number
         of iterations are saved as pz files.
         """
@@ -187,7 +215,7 @@ class MultiClassAnalysis:
         self.predictions = np.array([])
         for i in xrange(iterations):
             self.randomize_dataset_closed_world()
-            clf = GridSearchCV(svm.LinearSVC(), {'C':np.logspace(-3,3,7)})
+            clf = GridSearchCV(svm.LinearSVC(), {'C':np.logspace(-3, 3, 7)})
             clf.fit(self.X_train, self.Y_train)
             out = clf.best_estimator_.predict(self.X_test)
             self.predictions = np.append(self.predictions, out)
@@ -198,7 +226,7 @@ class MultiClassAnalysis:
 
     def run_open_experiment(self, iterations=10):
         """ Train a classifier on test data, obtain the best combination of
-        paramters through a grid search cross-validation and test the classifier
+        parameters through a grid search cross-validation and test the classifier
         using a open-world split of the dataset. The results from the number
         of iterations are saved as pz files.
         """
@@ -218,7 +246,7 @@ class MultiClassAnalysis:
                     p = classes[np.where(scores==m)]
                     self.predictions = np.append(self.predictions, p)
             self.true_labels = np.append(self.true_labels, self.Y_test)
-    
+
         pz.save(self.predictions, "mca_predictions_open.pz")
         pz.save(self.true_labels, "mca_true_labels_open.pz")
 
@@ -356,7 +384,7 @@ class Analysis:
         g_hash = ml.neighborhood_hash(g)
         g_x = ml.label_histogram(g_hash)
         return g_x
-    
+
     def randomize_dataset(self):
         """ Randomly split the dataset in training and testing sets
         """
@@ -409,7 +437,6 @@ class Analysis:
     # Plotting functions #
     ########################
 
-        
     def plot_average_roc(self, filename, boundary=0.1):
         """ Plot an average roc curve up to boundary using the rocs object of the the
         Analysis object. It can be called after run_linear_experiment. 
@@ -465,7 +492,6 @@ class Analysis:
         plt.grid(True)
         plt.savefig( filename, format='png' )
 
-
     def get_high_ranked_neighborhoods(self, fcgnx_file, sorted_weights_idx, n_weights=3):
         """ Retrieve the neigborhoods in a hashed graph with maximum weights.
         
@@ -482,7 +508,7 @@ class Analysis:
         g = pz.load(fcgnx_file)
         g_hash = ml.neighborhood_hash(g)
         bits = len(instructionSet.INSTRUCTION_CLASS_COLOR)
-        
+
         neighborhoods = []
         remaining_weights = n_weights
 
