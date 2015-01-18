@@ -3,25 +3,18 @@
 # analysis.py >> Load dataset, train, predict and evaluate  
 # Copyright (c) 2013 Hugo Gascon <hgascon@uni-goettingen.de>
 
-import sys
-import os
-import ml
-import eval
-import FCGextractor
-import instructionSet
-import random
-import collections
-import pz
-import numpy as np
-import scipy as sp
-from random import shuffle
-import time
-from progressbar import *
-import matplotlib.pyplot as plt
-from sklearn import svm
-from sklearn.preprocessing import normalize
-from sklearn.grid_search import GridSearchCV
+import adagio.common.ml as ml
+import adagio.common.eval as eval
+import adagio.core.instructionSet as instructionSet
+import adagio.common.pz as pz
 
+import collections
+import numpy as np
+import matplotlib.pyplot as plt
+from random import shuffle
+from progressbar import *
+from sklearn import svm
+from sklearn.grid_search import GridSearchCV
 
 
 class MultiClassAnalysis:
