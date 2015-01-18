@@ -85,7 +85,7 @@ class MultiClassAnalysis:
                         if size > 0:
 
                             t0 = time.time()
-                            x_i = self.compute_feature_vector(g)
+                            x_i = self.compute_label_histogram(g)
                             # save feature vector computing time for
                             # performance evaluation
                             self.feature_vector_times.append(time.time() - t0)
@@ -149,7 +149,7 @@ class MultiClassAnalysis:
 
         return files
 
-    def compute_feature_vector(self, g):
+    def compute_label_histogram(self, g):
         """ Compute the neighboorhood hash of a graph g and return
             the histogram of the hashed labels.
         """
