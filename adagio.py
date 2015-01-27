@@ -68,7 +68,7 @@ if __name__ == "__main__":
         args.out = os.path.realpath(args.out)
         mode ='PDG'
 
-    if type:
+    if mode:
         print_logo()
         process_dir(args.dir, args.out, mode)
 

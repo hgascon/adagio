@@ -4,8 +4,6 @@
 
 """ A module to build NX graph objects from APKs. """
 
-import sys
-import os
 import zipfile
 import networkx as nx
 import numpy as np
@@ -35,7 +33,6 @@ class FCG():
         # nx graph for FCG extracted from APK: nodes = method_name,
         # labels = encoded instructions
         fcg = nx.DiGraph()
-        print "Loading file {0}...".format(self.filename)
         try:
             self.a = APK(self.filename)
             self.d = DalvikVMFormat(self.a.get_dex())
@@ -97,12 +94,11 @@ class PDG():
 
     def __init__(self, filename):
         self.filename = filename
-        self.icfg = self.build_icfg()
+        self.g = self.build_icfg()
         self.nodes = {}
 
     def build_icfg(self):
         icfg = nx.DiGraph()
-        print "Loading file {0}...".format(self.filename)
         try:
             self.a = APK(self.filename)
             self.d = DalvikVMFormat(self.a.get_dex())
@@ -216,15 +212,15 @@ def process_dir(read_dir, out_dir, mode='FCG'):
         print '[] Loading {0}'.format(f)
         try:
             if mode is 'FCG':
-                g = FCG(f)
+                graph = FCG(f)
             elif mode is 'PDG':
-                g = PDG(f)
+                graph= PDG(f)
 
         # if an exception happens, save the .apk in the corresponding dir
         except Exception as e:
             err = e.__class__.__name__
             err_dir = err + "/"
-            d = os.path.join(self.read_dir, err_dir)
+            d = os.path.join(read_dir, err_dir)
             if not os.path.exists(d):
                 os.makedirs(d)
             cmd = "cp {} {}".format(f, d)
@@ -233,12 +229,12 @@ def process_dir(read_dir, out_dir, mode='FCG'):
             continue
 
         h = get_sha256(f)
-        if self.out_dir:
-            out = self.out_dir
+        if out_dir:
+            out = out_dir
         else:
-            out = self.read_dir
-        fnx = os.path.join(out, "{}.pdg.pz".format(h))
-        pz.save(g, fnx)
+            out = read_dir
+        fnx = os.path.join(out, "{}.pz".format(h))
+        pz.save(graph.g, fnx)
         print "[*] Saved {}\n".format(fnx)
         progress += 1
         pbar.update(progress)
