@@ -185,7 +185,7 @@ class PDG():
         return bb.get_start() <= idx <= bb.get_end()
 
 
-def process_dir(read_dir, out_dir, type='FCG'):
+def process_dir(read_dir, out_dir, mode='FCG'):
     """ Convert a series of APK into graph objects. Load all
     APKs in a dir subtree and create graph objects that are pickled
     for later processing and learning.
@@ -215,9 +215,9 @@ def process_dir(read_dir, out_dir, type='FCG'):
         f = os.path.realpath(f)
         print '[] Loading {0}'.format(f)
         try:
-            if type is 'FCG':
+            if mode is 'FCG':
                 g = FCG(f)
-            elif type is 'PDG':
+            elif mode is 'PDG':
                 g = PDG(f)
 
         # if an exception happens, save the .apk in the corresponding dir

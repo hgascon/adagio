@@ -8,10 +8,7 @@ import os
 sys.path.insert(0, os.path.abspath("modules/androguard"))
 
 import argparse
-
-from adagio.core.FCG import FCGGenerator
-from adagio.core.PDG import PDGGenerator
-
+from adagio.core.graphs import process_dir
 
 def print_logo():
     print("""
@@ -62,20 +59,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
     path_conf = os.path.realpath(args.conf)
 
-    generator = ""
+    mode = ""
     if args.fcgraphs:
         args.out = os.path.realpath(args.out)
-        generator = FCGGenerator(args.dir, args.out)
+        mode='FCG'
 
     elif args.pdgraphs:
         args.out = os.path.realpath(args.out)
-        generator = PDGGenerator(args.dir, args.out)
-        # print "Not implemented yet!"
-        # sys.exit()
+        mode ='PDG'
 
-    if generator:
+    if type:
         print_logo()
-        generator.process()
+        process_dir(args.dir, args.out, mode)
 
     else:
         exit()
