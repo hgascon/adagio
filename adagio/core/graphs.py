@@ -22,6 +22,20 @@ class FCG():
 
     def __init__(self, filename):
         self.filename = filename
+        try:
+            self.a = APK(filename)
+            self.d = DalvikVMFormat(self.a.get_dex())
+            self.d.create_python_export()
+            self.dx = VMAnalysis(self.d)
+            self.gx = GVMAnalysis(self.dx, self.a)
+        except zipfile.BadZipfile:
+            # if file is not an APK, may be a dex object
+            self.d, self.dx = AnalyzeDex(self.filename)
+
+        self.d.set_vmanalysis(self.dx)
+        self.d.set_gvmanalysis(self.gx)
+        self.d.create_xref()
+        self.d.create_dref()
         self.g = self.build_fcg()
 
     def build_fcg(self):
@@ -33,26 +47,11 @@ class FCG():
         # nx graph for FCG extracted from APK: nodes = method_name,
         # labels = encoded instructions
         fcg = nx.DiGraph()
-        try:
-            self.a = APK(self.filename)
-            self.d = DalvikVMFormat(self.a.get_dex())
-            self.d.create_python_export()
-            self.dx = VMAnalysis(self.d)
-            self.gx = GVMAnalysis(self.dx, self.a)
-        except zipfile.BadZipfile:
-            #if file is not an APK, may be a dex object
-            self.d, self.dx = AnalyzeDex(self.filename)
-
-        self.d.set_vmanalysis(self.dx)
-        self.d.set_gvmanalysis(self.gx)
-        self.d.create_xref()
-        self.d.create_dref()
-
         methods = self.d.get_methods()
         for method in methods:
             node_name = self.get_method_label(method)
 
-            #find calls from this method
+            # find calls from this method
             children = []
             for cob in method.XREFto.items:
                 remote_method = cob[0]
@@ -63,7 +62,7 @@ class FCG():
             for i in method.get_instructions():
                 instructions.append(i.get_name())
             encoded_label = self.color_instructions(instructions)
-            #add node, children and label to nx graph
+            # add node, children and label to nx graph
             fcg.add_node(node_name, label=encoded_label)
             fcg.add_edges_from([(node_name, child) for child in children])
 
@@ -93,12 +92,11 @@ class FCG():
 class PDG():
 
     def __init__(self, filename):
-        self.filename = filename
-        self.g = self.build_icfg()
-        self.nodes = {}
+        """
 
-    def build_icfg(self):
-        icfg = nx.DiGraph()
+        :type self: object
+        """
+        self.filename = filename
         try:
             self.a = APK(self.filename)
             self.d = DalvikVMFormat(self.a.get_dex())
@@ -106,14 +104,18 @@ class PDG():
             self.dx = VMAnalysis(self.d)
             self.gx = GVMAnalysis(self.dx, self.a)
         except zipfile.BadZipfile:
-            #if file is not an APK, may be a dex object
+            # if file is not an APK, may be a dex object
             self.d, self.dx = AnalyzeDex(self.filename)
 
         self.d.set_vmanalysis(self.dx)
         self.d.set_gvmanalysis(self.gx)
         self.d.create_xref()
         self.d.create_dref()
-
+        self.g = self.build_icfg()
+        
+    def build_icfg(self):
+        
+        icfg = nx.DiGraph()
         methods = self.d.get_methods()
         for method in methods:
             for bb in self.dx.get_method(method).basic_blocks.get():
@@ -122,7 +124,6 @@ class PDG():
                 children = self.get_children(bb, self.dx)
                 icfg.add_node(label)
                 icfg.add_edges_from([(label, child) for child in children])
-
         return icfg
 
     #def get_entry_points(self):
@@ -162,12 +163,12 @@ class PDG():
         """
 
         call_labels = []
-        #iterate over calls from bb method to external methods
+        # iterate over calls from bb method to external methods
         for cob in bb.method.XREFto.items:
             remote_method = cob[0]
             remote_method_analysis = dx.get_method(remote_method)
-            #iterate over the offsets of the call instructions and check
-            #if the offset is within the limits of the bb
+            # iterate over the offsets of the call instructions and check
+            # if the offset is within the limits of the bb
             for path in cob[1]:
                 if self.call_in_bb(bb, path.get_idx()):
                     try:
@@ -214,7 +215,7 @@ def process_dir(read_dir, out_dir, mode='FCG'):
             if mode is 'FCG':
                 graph = FCG(f)
             elif mode is 'PDG':
-                graph= PDG(f)
+                graph = PDG(f)
 
         # if an exception happens, save the .apk in the corresponding dir
         except Exception as e:
