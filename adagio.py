@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ADAGIO Structural Analysis of Android Binaries
-# Copyright (c) 2014 Hugo Gascon <hgascon@mail.de>
+# Copyright (c) 2015 Hugo Gascon <hgascon@mail.de>
 
 
 import sys
