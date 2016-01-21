@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     parser.add_argument("-c", "--conf", default="adagio/conf",
                         help="Change default directory for configuration files.\
-                        If no directory is given, the files from 'pulsar/conf'\
+                        If no directory is given, the files from 'adagio/conf'\
                         will be read.")
 
     parser.add_argument("-d", "--dir", default="",
