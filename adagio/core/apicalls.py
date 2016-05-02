@@ -2,8 +2,9 @@
 import os
 from progressbar import *
 from modules.androguard import *
-from modules.androguard.core.analysis import *
-from modules.androlyze import *
+from modules.androguard.androguard.core.analysis import *
+from modules.androguard.androlyze import *
+from pandas import DataFrame
 
 ########################################################################
 #                 Android API Calls related functions                  #
@@ -29,11 +30,11 @@ def list_calls(file):
     for method in d.get_methods():
         for i in method.get_instructions():
             if i.get_name()[:6] == "invoke":
-                #get method desc
+                # get method desc
                 call = i.get_output(0).split(',')[-1].strip()
-                #remove return value
+                # remove return value
                 call = call[:call.index(')')+1]
-                #split in class and method
+                # split in class and method
                 call = call.split('->')
                 method_class = get_type(call[0])
                 ins_method, params = call[1].split('(')
@@ -56,11 +57,11 @@ def list_calls_with_permissions(file, permission_map_file):
     for method in d.get_methods():
         for i in method.get_instructions():
             if i.get_name()[:6] == "invoke":
-                #get method desc
+                # get method desc
                 call = i.get_output(0).split(',')[-1].strip()
-                #remove return value
+                # remove return value
                 call = call[:call.index(')')+1]
-                #split in class and method
+                # split in class and method
                 call = call.split('->')
                 method_class = get_type(call[0])
                 ins_method, params = call[1].split('(')
@@ -106,11 +107,10 @@ def list_XREF(file):
     try:
         a, d, dx = AnalyzeAPK(file)
     except zipfile.BadZipfile:
-        #if file is not an APK, may be a dex object
+        # if file is not an APK, may be a dex object
         d, dx = AnalyzeDex(file)
 
     for method in d.get_methods():
         print get_node_name(method)
         print "XREFfrom:", [get_node_name(m[0]) for m in method.XREFfrom.items]
         print "XREFto:", [get_node_name(m[0]) for m in method.XREFto.items]
-
