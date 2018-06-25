@@ -13,7 +13,7 @@ from adagio.core.instructionSet import INSTRUCTION_CLASS_COLOR
 from adagio.core.instructionSet import INSTRUCTION_CLASSES
 
 from progressbar import *
-from modules.androguard.androlyze import *
+from androguard import *
 from adagio.common.utils import get_sha256
 import adagio.common.pz as pz
 
