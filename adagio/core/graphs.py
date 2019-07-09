@@ -13,7 +13,10 @@ from adagio.core.instructionSet import INSTRUCTION_CLASS_COLOR
 from adagio.core.instructionSet import INSTRUCTION_CLASSES
 
 from progressbar import *
-from modules.androguard.androlyze import *
+from androguard.core.bytecodes.apk import APK
+from androguard.core.analysis.analysis import Analysis
+from androguard.core.bytecodes.dvm import DalvikVMFormat
+from androguard.misc import AnalyzeDex
 from adagio.common.utils import get_sha256
 import adagio.common.pz as pz
 
@@ -26,54 +29,33 @@ class FCG():
             self.a = APK(filename)
             self.d = DalvikVMFormat(self.a.get_dex())
             self.d.create_python_export()
-            self.dx = VMAnalysis(self.d)
-            self.gx = GVMAnalysis(self.dx, self.a)
+            self.dx = Analysis(self.d)
         except zipfile.BadZipfile:
             # if file is not an APK, may be a dex object
-            self.d, self.dx = AnalyzeDex(self.filename)
+            _, self.d, self.dx = AnalyzeDex(self.filename)
 
         self.d.set_vmanalysis(self.dx)
-        self.d.set_gvmanalysis(self.gx)
-        self.d.create_xref()
-        self.d.create_dref()
+        self.dx.create_xref()
         self.g = self.build_fcg()
 
     def build_fcg(self):
         """ Using NX and Androguard, build a directed graph NX object so that:
-            - node names are method names as: class name, method name and
-              descriptor
+            - node names are analysis.MethodClassAnalysis objects
             - each node has a label that encodes the method behavior
         """
-        # nx graph for FCG extracted from APK: nodes = method_name,
-        # labels = encoded instructions
-        fcg = nx.DiGraph()
-        methods = self.d.get_methods()
-        for method in methods:
-            node_name = self.get_method_label(method)
-
-            # find calls from this method
-            children = []
-            for cob in method.XREFto.items:
-                remote_method = cob[0]
-                children.append(self.get_method_label(remote_method))
-
-            # find all instructions in method and encode using coloring
+        fcg = self.dx.get_call_graph()
+        for n in fcg.nodes:
             instructions = []
-            for i in method.get_instructions():
-                instructions.append(i.get_name())
-            encoded_label = self.color_instructions(instructions)
-            # add node, children and label to nx graph
-            fcg.add_node(node_name, label=encoded_label)
-            fcg.add_edges_from([(node_name, child) for child in children])
-
+            try:
+                ops = n.get_instructions()
+                for i in ops:
+                    instructions.append(i.get_name())
+                encoded_label = self.color_instructions(instructions)
+            except AttributeError:
+                encoded_label = np.array2string(np.zeros(len(INSTRUCTION_CLASSES),
+                                                             dtype=np.int8))
+            fcg.node[n]["label"]  = encoded_label
         return fcg
-
-    def get_method_label(self, method):
-        """ Return the descriptive name of a method
-        """
-        return (method.get_class_name(),
-                method.get_name(),
-                method.get_descriptor())
 
     def color_instructions(self, instructions):
         """ Node label based on coloring technique by Kruegel """
@@ -84,8 +66,7 @@ class FCG():
         return np.array(h)
 
     def get_classes_from_label(self, label):
-
-        classes = [INSTRUCTION_CLASSES[i] for i in xrange(len(label)) if label[i] == 1]
+        classes = [INSTRUCTION_CLASSES[i] for i in range(len(label)) if label[i] == 1]
         return classes
 
 
@@ -101,7 +82,7 @@ class PDG():
             self.a = APK(self.filename)
             self.d = DalvikVMFormat(self.a.get_dex())
             self.d.create_python_export()
-            self.dx = VMAnalysis(self.d)
+            self.dx = Analysis(self.d)
             self.gx = GVMAnalysis(self.dx, self.a)
         except zipfile.BadZipfile:
             # if file is not an APK, may be a dex object
