@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # ADAGIO Structural Analysis of Android Binaries
 # Copyright (c) 2014 Hugo Gascon <hgascon@mail.de>
 
@@ -12,13 +11,14 @@ from adagio.core.instructionSet import INSTRUCTION_SET_COLOR
 from adagio.core.instructionSet import INSTRUCTION_CLASS_COLOR
 from adagio.core.instructionSet import INSTRUCTION_CLASSES
 
-from progressbar import *
 from androguard.core.bytecodes.apk import APK
 from androguard.core.analysis.analysis import Analysis
 from androguard.core.bytecodes.dvm import DalvikVMFormat
 from androguard.misc import AnalyzeDex
 from adagio.common.utils import get_sha256
-import adagio.common.pz as pz
+from tqdm import tqdm
+import sys
+import os
 
 
 class FCG():
@@ -36,7 +36,10 @@ class FCG():
 
         self.d.set_vmanalysis(self.dx)
         self.dx.create_xref()
-        self.g = self.build_fcg()
+        self.fcg = self.build_fcg()
+
+    def get_graph(self):
+        return self.fcg
 
     def build_fcg(self):
         """ Using NX and Androguard, build a directed graph NX object so that:
@@ -79,23 +82,23 @@ class PDG():
         """
         self.filename = filename
         try:
-            self.a = APK(self.filename)
+            self.a = APK(filename)
             self.d = DalvikVMFormat(self.a.get_dex())
             self.d.create_python_export()
             self.dx = Analysis(self.d)
-            self.gx = GVMAnalysis(self.dx, self.a)
         except zipfile.BadZipfile:
             # if file is not an APK, may be a dex object
-            self.d, self.dx = AnalyzeDex(self.filename)
+            _, self.d, self.dx = AnalyzeDex(self.filename)
 
         self.d.set_vmanalysis(self.dx)
-        self.d.set_gvmanalysis(self.gx)
-        self.d.create_xref()
-        self.d.create_dref()
-        self.g = self.build_icfg()
+        self.dx.create_xref()
+        self.fcg = self.dx.get_call_graph()
+        self.icfg = self.build_icfg()
+
+    def get_graph(self):
+        return self.icfg
         
     def build_icfg(self):
-        
         icfg = nx.DiGraph()
         methods = self.d.get_methods()
         for method in methods:
@@ -106,9 +109,6 @@ class PDG():
                 icfg.add_node(label)
                 icfg.add_edges_from([(label, child) for child in children])
         return icfg
-
-    #def get_entry_points(self):
-        #return self.gx.entry_nodes
 
     def get_bb_label(self, bb):
         """ Return the descriptive name of a basic block
@@ -145,18 +145,20 @@ class PDG():
 
         call_labels = []
         # iterate over calls from bb method to external methods
-        for cob in bb.method.XREFto.items:
-            remote_method = cob[0]
-            remote_method_analysis = dx.get_method(remote_method)
-            # iterate over the offsets of the call instructions and check
-            # if the offset is within the limits of the bb
-            for path in cob[1]:
-                if self.call_in_bb(bb, path.get_idx()):
-                    try:
-                        remote_bb = remote_method_analysis.basic_blocks.get().next()
+        try:
+            xrefs = dx.get_method_analysis(bb.method).get_xref_to()
+        except AttributeError:
+            return call_labels
+        for xref in xrefs:
+            remote_method_offset = xref[2]
+            if self.call_in_bb(bb, remote_method_offset):
+                try:
+                    remote_method = dx.get_method(self.d.get_method_by_idx(remote_method_offset))
+                    if remote_method:
+                        remote_bb = next(remote_method.basic_blocks.get())
                         call_labels.append(self.get_bb_label(remote_bb))
-                    except StopIteration:
-                        pass
+                except StopIteration:
+                    pass
         return call_labels
 
     def call_in_bb(self, bb, idx):
@@ -176,27 +178,17 @@ def process_dir(read_dir, out_dir, mode='FCG'):
         for f in fileList:
             files.append(os.path.join(dirName, f))
 
-    # set up progress bar
-    print "\nProcessing {} APK files in dir {}".format(len(files), read_dir)
-    widgets = ['Building graphs: ',
-               Percentage(), ' ',
-               Bar(marker='#', left='[', right=']'),
-               ' ', ETA(), ' ']
-
-    pbar = ProgressBar(widgets=widgets, maxval=len(files))
-    pbar.start()
-    progress = 0
-
     # loop through .apk files and save them in .pdg.pz format
-    for f in files:
+    print("\nProcessing {} APK files in dir {}".format(len(files), read_dir))
+    for f in tqdm(files):
 
         f = os.path.realpath(f)
-        print '[] Loading {0}'.format(f)
+        print('[] Loading {0}'.format(f))
         try:
             if mode is 'FCG':
-                graph = FCG(f)
+                graph = FCG(f).get_graph()
             elif mode is 'PDG':
-                graph = PDG(f)
+                graph = PDG(f).get_graph()
 
         # if an exception happens, save the .apk in the corresponding dir
         except Exception as e:
@@ -207,18 +199,15 @@ def process_dir(read_dir, out_dir, mode='FCG'):
                 os.makedirs(d)
             cmd = "cp {} {}".format(f, d)
             os.system(cmd)
-            print "[*] {} error loading {}".format(err, f)
+            print("[*] {} error loading {}".format(err, f))
             continue
 
         h = get_sha256(f)
-        if out_dir:
-            out = out_dir
-        else:
-            out = read_dir
-        fnx = os.path.join(out, "{}.pz".format(h))
-        pz.save(graph.g, fnx)
-        print "[*] Saved {}\n".format(fnx)
-        progress += 1
-        pbar.update(progress)
-    pbar.finish()
-    print "Done."
+        if not out_dir:
+            out_dir = read_dir
+        if not os.path.exists(out_dir):
+            os.mkdir(out_dir)
+        fnx = os.path.join(out_dir, "{}".format(h))
+        nx.write_gpickle(graph, fnx)
+        print("[*] Saved {}\n".format(fnx))
+    print("Done.")
