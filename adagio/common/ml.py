@@ -2,13 +2,11 @@
 # ml >> functions for computation of kernel matrices and feature vectors
 # Copyright (c) 2013 Hugo Gascon <hgascon@uni-goettingen.de>
 
-import pz
 import numpy as np
 import scipy as sp
 import networkx as nx
-from pybloom import BloomFilter
-from scipy.spatial import distance
-from progressbar import *
+from tqdm import tqdm
+# from pybloom import BloomFilter
 from sklearn.preprocessing import normalize
 from collections import Counter
 
@@ -25,63 +23,33 @@ def nh_kernel_matrix(graph_set, R=1):
     K_set = []
 
     computation_size = R * (N ** 2 - sum(range(N + 1)))
-    print "Total number of graphs: {0}".format(N)
-    print "Total number of graph comparisons: {0}".format(computation_size)
+    print("Total number of graphs: {0}".format(N))
+    print("Total number of graph comparisons: {0}".format(computation_size))
 
-    for r in xrange(R):
+    for r in range(R):
 
         #compute neighbor hash for nodes in every graph
-        print "Starting iteration {0}...".format(r)
-        widgets = ['Computing NH: ',
-                   Percentage(), ' ',
-                   Bar(marker='#', left='[', right=']'),
-                   ' ', ETA(), ' ']
-        pbar = ProgressBar(widgets=widgets, maxval=N)
-        pbar.start()
-        progress = 0
-        for i in xrange(N):
+        for i in tqdm(N, desc="Computing NH"):
             graph_set[i] = neighborhood_hash(graph_set[i])
-            progress += 1
-            pbar.update(progress)
-        pbar.finish()
 
         #precompute the label histogram for each graph
-        widgets = ['Computing Label Hist: ',
-                   Percentage(), ' ',
-                   Bar(marker='#', left='[', right=']'),
-                   ' ', ETA(), ' ']
-        pbar = ProgressBar(widgets=widgets, maxval=N)
-        pbar.start()
-        progress = 0
         graph_set_hist = []
-        for i in xrange(N):
+        for i in tqdm(N, desc="Computing Label Hist"):
             g = graph_set[i]
             hist = label_histogram(g)
             graph_set_hist.append(hist)
-            progress += 1
-            pbar.update(progress)
-        pbar.finish()
 
         #compute upper triangular kernel matrix
-        widgets = ['Computing K: ',
-                   Percentage(), ' ',
-                   Bar(marker='#', left='[', right=']'),
-                   ' ', ETA(), ' ']
-        pbar = ProgressBar(widgets=widgets, maxval=computation_size)
-        pbar.start()
-        progress = 0
         K = np.identity(N)
-        for i in xrange(N):
-            for j in xrange(i + 1, N):
+        for i in tqdm(N, desc="Computing K"):
+            for j in range(i + 1, N):
                 k = histogram_intersection(graph_set_hist[i],
                                            graph_set_hist[j])
                 K[i, j] = k
-                progress += 1
-                pbar.update(progress)
-        pbar.finish()
         #build lower triangle
         K = K + K.transpose() - np.identity(len(K))
-        pz.save(K, "K_{0}.pz".format(r))
+        np.savez_compressed("K_{0}.npz".format(r), K)
+
         K_set.append(K)
 
     #normalization of K
@@ -98,41 +66,19 @@ def nh_explicit_data_matrix(graph_set, R=1):
     """
 
     N = len(graph_set)
-    print "Total number of graphs: {0}".format(N)
+    print("Total number of graphs: {0}".format(N))
 
-    for r in xrange(R):
-
+    for r in range(R):
         #compute neighbor hash for nodes in every graph
-        print "Starting iteration {0}...".format(r)
-        widgets = ['Computing NH: ',
-                   Percentage(), ' ',
-                   Bar(marker='#', left='[', right=']'),
-                   ' ', ETA(), ' ']
-        pbar = ProgressBar(widgets=widgets, maxval=N)
-        pbar.start()
-        progress = 0
-        for i in xrange(N):
+        for i in tqdm(N, desc="Computing NH"):
             graph_set[i] = neighborhood_hash(graph_set[i])
-            progress += 1
-            pbar.update(progress)
-        pbar.finish()
 
     #compute all feature vectors from histograms as sparse 0,N matrices
-    widgets = ['Computing X: ',
-               Percentage(), ' ',
-               Bar(marker='#', left='[', right=']'),
-               ' ', ETA(), ' ']
-    pbar = ProgressBar(widgets=widgets, maxval=N)
-    pbar.start()
-    progress = 0
     X = []
-    for i in xrange(N):
+    for i in tqdm(N, desc="Computing X"):
         g = graph_set[i]
         h = label_histogram(g)
         X.append(h)
-        progress += 1
-        pbar.update(progress)
-    pbar.finish()
     X = np.vstack(X)
 
     return X
@@ -145,41 +91,20 @@ def csnh_explicit_data_matrix(graph_set, R=1):
     """
 
     N = len(graph_set)
-    print "Total number of graphs: {0}".format(N)
+    print("Total number of graphs: {0}".format(N))
 
-    for r in xrange(R):
-
-        #compute cost sensitive neighbor hash for nodes in every graph
-        print "Starting iteration {0}...".format(r)
-        widgets = ['Computing CSNH: ',
-                   Percentage(), ' ',
-                   Bar(marker='#', left='[', right=']'),
-                   ' ', ETA(), ' ']
-        pbar = ProgressBar(widgets=widgets, maxval=N)
-        pbar.start()
-        progress = 0
-        for i in xrange(N):
+    for r in range(R):
+        # compute cost sensitive neighbor hash for nodes in every graph
+        print("Starting iteration {0}...".format(r))
+        for i in tqdm(N, desc='Computing CSNH'):
             graph_set[i] = count_sensitive_neighborhood_hash(graph_set[i])
-            progress += 1
-            pbar.update(progress)
-        pbar.finish()
 
     #compute all feature vectors from histograms as sparse 0,N matrices
-    widgets = ['Computing X: ',
-               Percentage(), ' ',
-               Bar(marker='#', left='[', right=']'),
-               ' ', ETA(), ' ']
-    pbar = ProgressBar(widgets=widgets, maxval=N)
-    pbar.start()
-    progress = 0
     X = []
-    for i in xrange(N):
+    for i in tqdm(N, desc='Computing X'):
         g = graph_set[i]
         h = label_histogram(g)
         X.append(h)
-        progress += 1
-        pbar.update(progress)
-    pbar.finish()
     X = np.vstack(X)
 
     return X
@@ -191,24 +116,14 @@ def simple_node_hash_data_matrix(graph_set):
     """
 
     N = len(graph_set)
-    print "Total number of graphs: {0}".format(N)
+    print("Total number of graphs: {0}".format(N))
 
     #compute all feature vectors from histograms as sparse 0,N matrices
-    widgets = ['Computing X: ',
-               Percentage(), ' ',
-               Bar(marker='#', left='[', right=']'),
-               ' ', ETA(), ' ']
-    pbar = ProgressBar(widgets=widgets, maxval=N)
-    pbar.start()
-    progress = 0
     X = []
-    for i in xrange(N):
+    for i in tqdm(N, desc="Computing X"):
         g = graph_set[i]
         h = label_histogram(g)
         X.append(h)
-        progress += 1
-        pbar.update(progress)
-    pbar.finish()
     X = np.vstack(X)
 
     return X
@@ -221,41 +136,21 @@ def xor_neighborhood_hash_data_matrix(graph_set, R=1):
     """
 
     N = len(graph_set)
-    print "Total number of graphs: {0}".format(N)
+    print("Total number of graphs: {0}".format(N))
 
-    for r in xrange(R):
+    for r in range(R):
 
         #compute cost sensitive neighbor hash for nodes in every graph 
-        print "Starting iteration {0}...".format(r)
-        widgets = ['Computing XORNH: ',
-                   Percentage(), ' ',
-                   Bar(marker='#', left='[', right=']'),
-                   ' ', ETA(), ' ']
-        pbar = ProgressBar(widgets=widgets, maxval=N)
-        pbar.start()
-        progress = 0
-        for i in xrange(N):
+        print("Starting iteration {0}...".format(r))
+        for i in tqdm(N, desc='Computing XORNH'):
             graph_set[i] = xor_neighborhood_hash(graph_set[i])
-            progress += 1
-            pbar.update(progress)
-        pbar.finish()
 
     #compute all feature vectors from histograms as sparse 0,N matrices
-    widgets = ['Computing X: ',
-               Percentage(), ' ',
-               Bar(marker='#', left='[', right=']'),
-               ' ', ETA(), ' ']
-    pbar = ProgressBar(widgets=widgets, maxval=N)
-    pbar.start()
-    progress = 0
     X = []
-    for i in xrange(N):
+    for i in tqdm(N, desc="Computing X"):
         g = graph_set[i]
         h = label_histogram(g)
         X.append(h)
-        progress += 1
-        pbar.update(progress)
-    pbar.finish()
     X = np.vstack(X)
 
     return X
@@ -300,7 +195,7 @@ def random_walk_kernel(g1, g2, parameter_lambda, node_attribute='label'):
     L = A.shape[0]
     k = 0
     A_exp = A
-    for n in xrange(L):
+    for n in range(L):
         k += (parameter_lambda ** n) * long(A_exp.sum())
         if n < L:
             A_exp = A_exp * A
@@ -328,8 +223,8 @@ def rwk_example():
     g2.add_node('c', color='w')
     g2.add_edges_from([('a', 'b'), ('b', 'c')])
 
-    print "rwk(g,g1) = {0}".format(random_walk_kernel(g, g1, 0.1, 'color'))
-    print "rwk(g,g2) = {0}".format(random_walk_kernel(g, g2, 0.1, 'color'))
+    print("rwk(g,g1) = {0}".format(random_walk_kernel(g, g1, 0.1, 'color')))
+    print("rwk(g,g2) = {0}".format(random_walk_kernel(g, g2, 0.1, 'color')))
 
 
 #################################
@@ -416,23 +311,23 @@ def xor_neighborhood_hash(g):
 
     return gnh
 
-
-def bloom_filter_hash(g, c, e):
-    """ Compute the bloom filter neighborhood hashed version of a graph.
-    """
-
-    gnh = g.copy()
-
-    for node in iter(g.nodes()):
-        node_label = g.node[node]["label"]
-        neighbors_labels = [g.node[n]["label"] for n in g.neighbors_iter(node)]
-        neighbors_labels.append(node_label)
-        f = BloomFilter(capacity=c, error_rate=e)
-        [f.add(l) for l in neighbors_labels]
-        nh = f.bitarray
-        gnh.node[node]["label"] = nh
-
-    return gnh
+# pybloom in moment not available for Python 3
+# def bloom_filter_hash(g, c, e):
+#     """ Compute the bloom filter neighborhood hashed version of a graph.
+#     """
+#
+#     gnh = g.copy()
+#
+#     for node in iter(g.nodes()):
+#         node_label = g.node[node]["label"]
+#         neighbors_labels = [g.node[n]["label"] for n in g.neighbors_iter(node)]
+#         neighbors_labels.append(node_label)
+#         f = BloomFilter(capacity=c, error_rate=e)
+#         [f.add(l) for l in neighbors_labels]
+#         nh = f.bitarray
+#         gnh.node[node]["label"] = nh
+#
+#     return gnh
 
 
 def array_labels_to_str(g):
@@ -492,24 +387,14 @@ def make_binary(X):
     """
 
     N, M = X.shape
-    widgets = ['Making X binary... : ',
-               Percentage(), ' ',
-               Bar(marker='#', left='[', right=']'),
-               ' ', ETA(), ' ']
-    pbar = ProgressBar(widgets=widgets, maxval=N)
-    pbar.start()
-    progress = 0
     m = np.max(X)
     X_bin = sp.sparse.lil_matrix((N, M * m), dtype=np.int8)
 
-    for i in xrange(N):
-        for j in xrange(M):
+    for i in tqdm(N, desc="Making X binary"):
+        for j in range(M):
             n = X[i, j]
             X_bin[i, m * j:(m * j + n)] = 1
-        progress += 1
-        pbar.update(progress)
     X_bin = sp.sparse.csr_matrix(X_bin)
-    pbar.finish()
     return X_bin, m
 
 

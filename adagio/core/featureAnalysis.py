@@ -5,10 +5,11 @@
 
 
 import os
-import ml
-import pz
 import numpy as np
+import networkx as nx
 from random import shuffle
+
+from adagio.common import ml
 
 
 """
@@ -27,7 +28,7 @@ def print_largest_weights(w_agg, n):
     idx = w_agg.argsort()[::-1][:n]
     w_agg_highest = w_agg[idx]
     labels = [np.binary_repr(i, 15) for i in idx]
-    print zip(w_agg_highest, labels)
+    print(zip(w_agg_highest, labels))
 
 
 def aggregate_binary_svm_weights(w_binary, expansion_bits):
@@ -62,11 +63,11 @@ def compute_neighborhoods_per_weights(d, w, n_weights, n_files=300):
         Outputs the file feature_analysis.txt
     """
 
-    files = read_files(d, "fcgnx.pz", n_files)
+    files = read_files(d, "fcgnx", n_files)
     sorted_weights_idx = w.argsort()[::-1]
 
     f_out = "feature_analysis.txt".format(n_weights)
-    print "[*] Writing file {0}...".format(f_out)
+    print("[*] Writing file {0}...".format(f_out))
     fd = open(f_out, 'wb')
     # fd.write("Total number of weights in SVM model: {0}\n".format(len(w)))
     # fd.write("Selected number of highest weights per sample: {0}\n".format(n_weights))
@@ -85,13 +86,13 @@ def compute_neighborhoods_per_weights(d, w, n_weights, n_files=300):
         except:
             pass
     fd.close()
-    print "[*] File written."
+    print("[*] File written.")
 
 
 def get_high_ranked_neighborhoods(fcgnx_file, w, sorted_weights_idx,
                                   show_small=False, weights=1):
     # g = FCGextractor.build_cfgnx(fcgnx_file)
-    g = pz.load(fcgnx_file)
+    g = nx.read_gpickle(fcgnx_file)
     g_hash = ml.neighborhood_hash(g)
 
     neighborhoods = []

@@ -3,18 +3,19 @@
 # analysis.py >> Load dataset, train, predict and evaluate  
 # Copyright (c) 2015 Hugo Gascon <hgascon@mail.de>
 
-import adagio.common.ml as ml
-import adagio.common.eval as eval
+from adagio.common import ml
+from adagio.common import eval
 import adagio.core.instructionSet as instructionSet
-import adagio.common.pz as pz
 
+import os
+import time
 import collections
 import numpy as np
 import matplotlib.pyplot as plt
 from random import shuffle
-from progressbar import *
+from tqdm import tqdm
 from sklearn import svm
-from sklearn.grid_search import GridSearchCV
+from sklearn.model_selection import GridSearchCV
 
 
 class Analysis:
@@ -70,32 +71,25 @@ class Analysis:
 
         if precomputed_matrix:
             # Load the y labels and file names from zip pickle objects.
-            print "Loading matrix..."
-            self.X = pz.load(precomputed_matrix)
-            print "[*] matrix loaded"
-            self.Y = pz.load(y)
-            print "[*] labels loaded"
-            self.fnames = pz.load(fnames)
-            print "[*] file names loaded"
+            print("Loading matrix...")
+            self.X = np.savez_compressed(precomputed_matrix)
+            print("[*] matrix loaded")
+            self.Y = np.load(y)
+            print("[*] labels loaded")
+            self.fnames = np.load(fnames)
+            print("[*] file names loaded")
 
         else:
             # loop over dirs
             for d in zip(dirs, labels):
-                files = self.read_files(d[0], "fcg.pz", max_files)
-                print "Loading samples in dir {0} with label {1}".format(d[0],
-                                                                         d[1])
-                widgets = ['Unpickling... : ',
-                           Percentage(), ' ',
-                           Bar(marker='#', left='[', right=']'),
-                           ' ', ETA(), ' ']
-                pbar = ProgressBar(widgets=widgets, maxval=len(files))
-                pbar.start()
-                progress = 0
+                files = self.read_files(d[0], "fcg", max_files)
+                print("Loading samples in dir {0} with label {1}".format(d[0],
+                                                                         d[1]))
 
                 # load labels and feature vectors
-                for f in files:
+                for f in tqdm(files):
                     try: 
-                        g = pz.load(f)
+                        g = np.load(f)
                         size = g.number_of_nodes()
                         if size < max_node_size or max_node_size == 0:
                             if size > 0:
@@ -120,20 +114,16 @@ class Analysis:
                                 self.X.append(x_i)
                                 self.Y = np.append(self.Y, [int(d[1])])
                                 self.fnames.append(f)
-                    except Exception, e:
-                        print e
-                        print "err: {0}".format(f)
+                    except Exception as e:
+                        print(e)
+                        print("err: {0}".format(f))
                         pass
-                    progress += 1
-                    pbar.update(progress)
-
-                pbar.finish()
 
             # convert feature vectors to its binary representation
             # and make the data matrix sparse
-            print "[*] Stacking feature vectors..."
+            print("[*] Stacking feature vectors...")
             self.X = np.array(self.X, dtype=np.int16)
-            print "[*] Converting features vectors to binary..."
+            print("[*] Converting features vectors to binary...")
             self.X, self.b = ml.make_binary(self.X) 
 
     ################################
@@ -239,15 +229,15 @@ class Analysis:
         self.Y_test = self.Y[test_index]
 
     def save_data(self):
-        """ Store pz objects for the data matrix, the labels and
+        """ Store npz objects for the data matrix, the labels and
             the name of the original samples so that they can be used
             in a new experiment without the need to extract all
             features again
         """
-        print "[*] Saving labels, data matrix and file names..."
-        pz.save(self.X, "X.pz")
-        pz.save(self.Y, "Y.pz")
-        pz.save(self.fnames, "fnames.pz")
+        print("[*] Saving labels, data matrix and file names...")
+        np.savez_compressed("X.npz", self.X)
+        np.savez_compressed("Y.npz", self.Y)
+        np.savez_compressed("fnames.npz", self.fnames)
 
     ###################################
     # Learning & Evaluation functions #
@@ -265,34 +255,34 @@ class Analysis:
         :param rocs_filename: the file to save all rocs computed
         :param iterations: number of runs (training/testing)
         """
-        for i in xrange(iterations):
-            print "[*] Iteration {0}".format(i)
-            print "[*] Randomizing dataset..."
+        for i in range(iterations):
+            print("[*] Iteration {0}".format(i))
+            print("[*] Randomizing dataset...")
             self.randomize_dataset()
             clf = GridSearchCV(svm.LinearSVC(), {'C': np.logspace(-3, 3, 7)})
-            print "[*] Training..."
+            print("[*] Training...")
             clf.fit(self.X_train, self.Y_train)
             out = clf.best_estimator_.decision_function(self.X_test)
-            print "[*] Testing..."
+            print("[*] Testing...")
             roc = eval.compute_roc(np.float32(out.flatten()),
                                    np.float32(self.Y_test))
             self.rocs.append(roc)
-            print "[*] ROC saved."
-        pz.save(self.rocs, rocs_filename)
+            print("[*] ROC saved.")
+        np.savez_compressed(rocs_filename, self.rocs)
 
     def run_linear_closed_experiment(self, iterations=10, save=False):
         """
         Train a classifier on test data, obtain the best combination of
         parameters through a grid search cross-validation and test the
         classifier using a closed-world split of the dataset. The results
-        from the number of iterations are saved as pz files.
+        from the number of iterations are saved as npz files.
 
         :param iterations: number of runs (training/testing)
         :save: save predictions and labels if True
         """
         self.true_labels = np.array([])
         self.predictions = np.array([])
-        for i in xrange(iterations):
+        for i in range(iterations):
             self.randomize_dataset_closed_world()
             clf = GridSearchCV(svm.LinearSVC(), {'C': np.logspace(-3, 3, 7)})
             clf.fit(self.X_train, self.Y_train)
@@ -301,22 +291,22 @@ class Analysis:
             self.true_labels = np.append(self.true_labels, self.Y_test)
 
         if save:
-            pz.save(self.predictions, "mca_predictions_closed.pz")
-            pz.save(self.true_labels, "mca_true_labels_closed.pz")
+            np.savez_compressed("mca_predictions_closed.npz", self.predictions)
+            np.savez_compressed("mca_true_labels_closed.npz", self.true_labels)
 
     def run_linear_open_experiment(self, iterations=10, save=False):
         """
         Train a classifier on test data, obtain the best combination of
         parameters through a grid search cross-validation and test the
         classifier using a open-world split of the dataset. The results
-        from the number of iterations are saved as pz files.
+        from the number of iterations are saved as npz files.
 
         :param iterations: number of runs (training/testing)
         :save: save predictions and labels if True
         """
         self.true_labels = np.array([])
         self.predictions = np.array([])
-        for i in xrange(iterations):
+        for i in range(iterations):
             self.randomize_dataset_open_world()
             clf = GridSearchCV(svm.LinearSVC(), {'C': np.logspace(-3, 3, 7)})
             clf.fit(self.X_train, self.Y_train)
@@ -332,8 +322,8 @@ class Analysis:
             self.true_labels = np.append(self.true_labels, self.Y_test)
 
         if save:
-            pz.save(self.predictions, "mca_predictions_open.pz")
-            pz.save(self.true_labels, "mca_true_labels_open.pz")
+            np.savez_compressed("mca_predictions_open.npz", self.predictions)
+            np.savez_compressed("mca_true_labels_open.npz", self.true_labels)
 
     ########################
     # Plotting functions #
@@ -374,7 +364,7 @@ class Analysis:
 
         :filename: name of the file to save the plot
         :boundary: upper False Positive limit for the roc plot
-        :roc_pickles: list of pz file names containing several rocs each
+        :roc_pickles: list of npz file names containing several rocs each
         :returns: None. It saves the roc plot in a png file with the
             specified filename
         """
@@ -384,7 +374,7 @@ class Analysis:
         linestyles = ['k-', 'k--', 'k-.', 'k:', 'k.',
                       'k*', 'k^', 'ko', 'k+', 'kx']
         for f, style in zip(roc_pickles, linestyles[:len(roc_pickles)]):
-            avg_roc, std_roc = eval.average_roc(pz.load(f), fps)
+            avg_roc, std_roc = eval.average_roc(np.load(f), fps)
             plt.plot(avg_roc[1], avg_roc[0], style)
         plt.legend(roc_pickles, 'lower right', shadow=True)
         plt.xlabel('False Positive Rate')
@@ -409,7 +399,7 @@ class Analysis:
         :returns: a list of matching neighborhoods.
         """
         # g = FCG.build_fcg(fcg_file)
-        g = pz.load(fcg_file)
+        g = np.load(fcg_file)
         g_hash = ml.neighborhood_hash(g)
         bits = len(instructionSet.INSTRUCTION_CLASS_COLOR)
 
