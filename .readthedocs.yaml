@@ -15,7 +15,7 @@ build:
 sphinx:
   configuration: docs/conf.py
   extensions:
-    - sphinx.ext.pngmath
+    - sphinx.ext.imgmath
     - sphinx.ext.viewcode
 
 # We recommend specifying your dependencies to enable reproducible builds:
