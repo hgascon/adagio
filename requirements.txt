@@ -27,3 +27,6 @@ six==1.12.0
 tqdm==4.32.2
 traitlets==4.3.2
 wcwidth==0.1.7
+sphinx
+sphinx.ext.imgmath
+sphinx.ext.viewcode
